@@ -5,7 +5,7 @@ Open up source and look at main and we can see two functions that give us an ide
 
 The read_canary() function opens up the file called canary.txt and reads 4 bytes from that file and puts it in a global string called global_canary.
 
-The vuln() function is the meat of this program and it does:
+The vuln() function is the meat of this program and it:
 1. Copies the global_canary to the local canary 
 2. Asks how many bytes you want to write into the buffer. You can put any number that is less than BUFSIZE (32) digits. So we have a lot of room to work with...
 3. Next the function will put into buf what we write for our input up to how many bytes we specified we wanted to write. It has no bounds checking and the buf size is 32. This is susceptable to a buffer overflow.
@@ -16,7 +16,7 @@ Based on the order in which the local variables were declared means that the loc
 We could run the program in an automated fashion with pwntools and guess the entire stack canary but the search size for that is 2^32 which isn't terrible but not great either. A faster method would be to guess the stack canary one byte at a time reducing the search space to (2^8) * 4 which is much much smaller.
 
 The solution script details how this is done. 
-The script must be run in a tmp folder on the server and symbolic links to the vuln executable, the flag.txt and the canary.txt must be made in order for the script to complete.
+The script must be run in a tmp folder on the server and symbolic links to the vuln executable, flag.txt and canary.txt must be made in order for the script to complete.
 
 symbolic links in your tmp directory can be made by:
 ```
