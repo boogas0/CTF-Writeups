@@ -1,7 +1,7 @@
 # Seed_sPRiNG
 When you connect to the server using the command provided in the problem you will see that it runs a program that is a guessing game. The game tells us that we are on level 1 out of 30 and to guess the height. When you enter your input, you will probably guess incorrectly and it will close the connection.
 
-The source is not given but the binary for the program the server runs is given so go ahead and open that up in ghidra and go to main in the decompiler. You should get something similar to the code below from Ghidra. Start going through renaming variables and commenting as you like to get an understanding of what this program is doing.
+The source is not given but the binary is given so go ahead and open that up in ghidra and go to main in the decompiler. You should get something similar to the code below from decompiling main in Ghidra. Start going through the code in Ghidra renaming variables and commenting as you like to get an understanding of what the program is doing.
 
 
 ```C
@@ -102,8 +102,8 @@ Now that this program is more readable we can start to see what is going on.
 1. It makes a call to time() with an argument of zero which will return the current time in seconds.
 2. It then takes the current time and calls it with srand() which will seed the random number generator... more on that later.
 3. Next the program runs a loop
-   1. The loop checks if level is 30 or above in which case it will print the flag and you win.
-   2. Next it calls rand() which returns a random number based on the seed that was established from time that we saw before the loop.
+   1. The loop checks if level is greater than 30 in which case it will print the flag and you win.
+   2. Next it calls rand() which returns a random number based on the seed that was established with srand() before the loop.
    3. It then takes the random number and only keeps the last 4 bits `height = height &0xf` this means that the height will always be between 0-15
    4. The last thing the loop does is check the height against the user input and if they are the same you move on to the next level.
 
