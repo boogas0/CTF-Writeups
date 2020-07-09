@@ -32,4 +32,4 @@ os.environ['PWNLIB_NOTERM'] = 'True'
 ```
 The above was added to the solution script because on the 2018 shell provided through the web it will hang on import pwn `c = os.read(fd.fileno(), 1)` and the above code will fix that issue.
 
-picoCTF{eT_tU_bRuT3_F0Rc3_6b01eec0}
+Flag: picoCTF{eT_tU_bRuT3_F0Rc3_6b01eec0}
