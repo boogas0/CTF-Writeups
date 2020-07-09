@@ -3,7 +3,7 @@ testing Readme
 
 
 
-'''C
+```C
 undefined4 main(void)
 {
   uint local_20;
@@ -56,10 +56,10 @@ undefined4 main(void)
                     /* WARNING: Subroutine does not return */
   exit(-1);
 }
-'''
+```
 
 
-'''C
+```C
 int main(int argc,char **argv)
 {
   uint userGuess;
@@ -96,5 +96,5 @@ int main(int argc,char **argv)
   fflush(stdout);
   exit(-1);
 }
-'''
+```
 I took out the Seed Spring greeting ASCII art and one of the locals that was never used.
