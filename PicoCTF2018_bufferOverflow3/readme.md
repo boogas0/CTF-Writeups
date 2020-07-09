@@ -20,11 +20,16 @@ The script must be run in a tmp folder on the server and symbolic links to the v
 
 symbolic links in your tmp directory can be made by:
 ```
-ln -s /problems/buffer-overflow-3_0_dcd896c1491ad710043225eda6abcd8a/vuln buff3
+ln -s /problems/buffer-overflow-3_0_dcd896c1491ad710043225eda6abcd8a/vuln vuln
 ln -s /problems/buffer-overflow-3_0_dcd896c1491ad710043225eda6abcd8a/flag.txt flag.txt
 ln -s /problems/buffer-overflow-3_0_dcd896c1491ad710043225eda6abcd8a/canary.txt canary.txt
 ```
 
-
+A quick note on
+```Python
+import os
+os.environ['PWNLIB_NOTERM'] = 'True'
+```
+The above was added to the solution script because on the 2018 shell provided through the web it will hang on import pwn `c = os.read(fd.fileno(), 1)` and the above code will fix that issue.
 
 picoCTF{eT_tU_bRuT3_F0Rc3_6b01eec0}
