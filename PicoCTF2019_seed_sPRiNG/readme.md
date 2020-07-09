@@ -1,3 +1,4 @@
+# Seed_sPRiNG
 When you connect to the server using the command provided in the problem you will see that it runs a program that is a guessing game. The game tells us that we are on level 1 out of 30 and to guess the height. When you enter your input, you will probably guess incorrectly and it will close the connection.
 
 The source is not given but the binary for the program the server runs is given so go ahead and open that up in ghidra and go to main in the decompiler. You should get something similar to the code below from Ghidra. Start going through renaming variables and commenting as you like to get an understanding of what this program is doing.
@@ -57,7 +58,7 @@ undefined4 main(void)
   exit(-1);
 }
 ```
-Below is what I ended up with after cleaning up the code. I editing the function signature of main, renamed all locals to logical names, took out anything that didn't contribute to the program (local_10 in above) and also removed the all the puts function calls that made the ascii art because it was just in the way.
+Below is what I ended up with after cleaning up the code. I edited the function signature of main, renamed all locals to logical names, took out anything that didn't contribute to the program (local_10 in above) and also removed all the puts function calls that made the ascii art because it was just in the way.
 
 ```C
 int main(int argc,char **argv)
