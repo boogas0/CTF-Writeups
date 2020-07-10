@@ -29,7 +29,7 @@ The problem told us this is similar to write4 so we know that the buffer overflo
 
 ```
 
-We will use the same method that was used to solve write4. Call system() with '/bin/sh', all we need to do that is a gadget that can write to somewhere in memory and pop gadgets to go with it.
+We will use the same method that was used to solve write4: call system() with '/bin/sh'. All we need to call system('/bin/sh') is a gadget that can write to somewhere in memory and pop gadgets to go with it.
 
 #### writeGadget:
 ```Assembly
@@ -40,11 +40,11 @@ We will use the same method that was used to solve write4. Call system() with '/
   400858:   c3                      ret
 ```
 
-This gadget is a good candidate for writing to memory, we will call it the writeGadget. We can fill r13 with junk and zero out r12. r12 must be zero'ed out so that the xor instruction will not affect the data we just wrote. Luckily since we are using gets() to exploit this program we can write null bytes with no issue.
+This gadget is a good candidate for writing to memory. We can fill r13 with junk and zero out r12. r12 must be zero'ed out so that the xor instruction will not affect the data we just wrote. Luckily since we are using gets() to exploit this program we can write null bytes with no issue.
 
-Now we just need to find gadgets to put the contents we wnat in r10 and r11... sadly there are no easy pop r10 or pop r11 gadgets. Now things start to get difficult and we have to use things like xchg and xor.
+Now we just need to find gadgets to put the contents we want in r10 and r11... sadly there are no easy pop r10 or pop r11 gadgets. Now things start to get difficult and we have to use things like xchg and xor.
 
-The gadget below means that as long as we can find a way to write to r11 or r10 then we will be able to xchg it with the other and write to that gadget again. So we only need to find one more gadget that can write to either r10 or r11.
+The gadget below means that as long as we can find a way to write to r11 or r10 then we will be able to xchg it with the other and then write to the first gadget again. So we only need to find one more gadget that can write to either r10 or r11.
 
 #### xchgGadget:
 ```Assembly
@@ -54,7 +54,7 @@ The gadget below means that as long as we can find a way to write to r11 or r10 
   40084b:   c3                      ret
 ```
 
-Using the three gadgets below we can write to r11. We want to write the desired value of r10 to r11 first so that we can use the xchg gadget to get r10 with it's desired value. Referencing the writeGadget above, r10 must have a value of somewhere in memory that is writable. A good place to look for that is the got section because it has to be writable in order for the got to accomplish its function. I chose 0x6010d0, just some random spot in memory not too far after the got but far enough that it shouldn't mess with anything. If you are having trouble finding the got section in radare2 use the command :iS which will give you addresses of the sections and then use the seek command to go to where it says the got section is. 
+Using the three gadgets below we can write to r11. We want to write the desired value of r10 to r11 first so that we can use the xchgGadget to populate r10 with the value we desire before we call writeGadget. Referencing the writeGadget above, r10 must have a value of somewhere in memory that is writable. A good place to look for that is the GOT section because it has to be writable in order for the GOT to accomplish its function. I chose 0x6010d0, because it was in a spot in memory not too far after the got but far enough that it shouldn't mess with anything. If you are having trouble finding the GOT section in radare2 use the command :iS which will give you addresses of the sections and then use the seek command. 
 
 #### popR12:
 ```Assembly
@@ -79,24 +79,22 @@ Using the three gadgets below we can write to r11. We want to write the desired 
   40083a:   c3                      ret
 ```
 
-##### Write to r11:
-1. Use the popR12 gadget to write 0x6010d0 (where we want '/bin/sh\x00' to be in memory) into r12.
-2. Use clearR11 gadget to zero out r11 (anything xor'ed with itself is 0)
-3. Use xorR11R12 gadget to write r12's contents to r11. (any xor'ed with 0 is itself)
-   - Also thinking ahead now is a good time to write to r12 what we want in r11 ('/bin/sh\x00')
+##### Steps to write to r11:
+1. Use the popR12 gadget to write 0x6010d0 (where we will put '/bin/sh\x00') into r12.
+2. Use the clearR11 gadget to zero out r11 (anything xor'ed with itself is 0)
+3. Use the xorR11R12 gadget to write r12's contents to r11. (anything xor'ed with 0 is itself)
+   - Also thinking ahead. Now is a good time to write to r12 what we want in r11 ('/bin/sh\x00') since there is a pop r12 in the xorR11R12 gadget
 
-Now r11 has the value we want in r10 to perform our write.
+Now r11 has the value we want in r10 before we use writeGadget.
 
 Use the xchgGadget to put r11's contents in r10.
 
-Repeat the write to r11 process skipping past the first step because the side effect of step 3 was basically step 1.
+Repeat the write to r11 process skipping the first step because the side effect of step 3 made it so we can skip step 1.
 
 Now both r11 and r10 should have the values they need to call writeGadget. Don't forget to put junk on the stack for the two pop's after the mov instruction.
 
 All that is left is calling system('/bin/sh\x00') using the address of the entry of system in the plt.
 
-To call system with an argument we need to put the argument in rdi. There are no pop rdi instructions in questionableGadgets however using ropper or any ropping tool you should be able to find one. (0x4008c3) You can find where you should put your arguments to functions in a table at the bottom of this [wikipedia article](https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-AMD-24), it is based off architecture and compiler. Since you were given the binary and not the source, everyone should be the same and use rdi for this challenge.
+To call system with an argument we need to put the argument in rdi. There are no pop rdi instructions in questionableGadgets however using ropper or any ropping tool you should be able to find one. (0x4008c3) You can find where you should put your arguments for function calls in a table at the bottom of this [wikipedia article](https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-AMD-24), it is based off architecture and compiler. Since you were given the binary and not the source, everyone should be the same and use rdi for this challenge.
 
-Pop the data segment (0x6010d0) into rdi and put system_plt entry on the stack and you will call system with 'bin/sh\x00' giving you a shell to cat the flag. You could continue the process above and instead of calling system with 'bin/sh\x00' call it with 'cat flag.txt\x00' but that would take another writeGadget with all the setup that goes into it.
-
-
+Pop the data segment (0x6010d0) into rdi and put system_plt entry on the stack and you will call system with 'bin/sh\x00' giving you a shell to cat the flag. You could continue the process above and instead of calling system with 'bin/sh\x00' call it with 'cat flag.txt\x00' but that would take another writeGadget including all the setup that goes into writeGadget.
