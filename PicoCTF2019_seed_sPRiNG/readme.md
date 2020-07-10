@@ -1,7 +1,7 @@
 # Seed_sPRiNG
 When you connect to the server using the command provided in the problem you will see that it runs a program that is a guessing game. The game tells us that we are on level 1 out of 30 and to guess the height. When you enter your input, you will probably guess incorrectly and it will close the connection.
 
-The source is not given but the binary is given so go ahead and open that up in ghidra and go to main in the decompiler. You should get something similar to the code below from decompiling main in Ghidra. Start going through the code in Ghidra renaming variables and commenting as you like to get an understanding of what the program is doing.
+The source is not given but the binary is given so go ahead and open that up in Ghidra and go to main in the decompiler. You should get something similar to the code below from decompiling main in Ghidra. Start going through the code in Ghidra renaming variables and commenting as you like to get an understanding of what the program is doing.
 
 
 ```C
@@ -58,7 +58,7 @@ undefined4 main(void)
   exit(-1);
 }
 ```
-Below is what I ended up with after cleaning up the code. I edited the function signature of main, renamed all locals to logical names, took out anything that didn't contribute to the program (local_10 in above) and also removed all the puts function calls that made the ascii art because it was just in the way.
+Below is what I ended up with after cleaning up the code. I edited the function signature of main, renamed all local variables to logical names, took out anything that didn't contribute to the program (local_10 in above) and also removed all the puts function calls that made the ascii art because it was just in the way.
 
 ```C
 int main(int argc,char **argv)
@@ -107,15 +107,15 @@ Now that this program is more readable we can start to see what is going on.
    3. It then takes the random number and only keeps the last 4 bits `height = height &0xf` this means that the height will always be between 0-15
    4. The last thing the loop does is check the height against the user input and if they are the same you move on to the next level.
 
-In summary all we have to do is input 30 correct guesses of the height which we know will be between 0-15 in a row to get the flag.
+In summary all we have to do is input 30 correct guesses in a row. 
 
-Guessing 0-15 30 times in a row is astronomically bad odds, even with automation it simply would not be possible so we will have to exploit the program in a different way.
+Guessing a random number from 0 to 15 30 times in a row is astronomically bad odds, even with automation it simply would not be feasible. We will have to exploit the program in a different way.
 
 This is where knowledge of how stdlib's rand and srand functions work is necessary. The rand() function does not actually return a truly random number and randomness in computing is actually a very difficult problem. The way stblib implements rand is by using a Psuedo Random Number Generator. This is basically a really long list of hand picked "random" numbers. When you use srand() it seeds the Random Number Generator by picking an index in that list and then every future call to rand will just iterate through that list.
 
 So if we can call srand() with the same argument that the program calls it with and then call rand() 30 times we will get the same "random" numbers the program does then we can & 0xf those numbers to get the heights. srand() is called with the current server time in seconds. Luckily we already have access to the server through the picoCTF shell so we don't really need to worry about syncronizing, we can just run a program that calls srand() with current time and prints out 30 rand() numbers then run the program and as long as both run within the same second they will be the same "random" numbers.
 
-Make a folder in the /tmp folder on the picoCTF server and make a program like below either using vim on the server or write it on your own and scp it over.
+Make a folder in the /tmp folder on the picoCTF server and write a simple C program that does what I described in above. Below is an example.
 
 ```C
 #include <stdlib.h>
@@ -133,4 +133,4 @@ int main(){
 Compile and now you can just run the syncronizer program and pipe it to the connection and get your flag
 `./syncronizer | nc 2019shell1.picoctf.com 47241`
 
-picoCTF{pseudo_random_number_generator_not_so_random_1e980471db65a9f446af481d75490127}
+Flag: picoCTF{pseudo_random_number_generator_not_so_random_1e980471db65a9f446af481d75490127}
