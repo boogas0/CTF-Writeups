@@ -95,7 +95,7 @@ Now both r11 and r10 should have the values they need to call writeGadget. Don't
 
 All that is left is calling system('/bin/sh\x00') using the address of the entry of system in the plt.
 
-To call system with an argument we need to put the argument in rdi. There are no pop rdi instructions in questionableGadgets however using ropper or any ropping tool you should be able to find one. (0x4008c3) You can find where you should put your arguments to functions in a table at the bottom of this [wikipedia article](https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-AMD-24), it is based off architecture and compiler. Since you were given the binary and not the source, everyone should use rdi.
+To call system with an argument we need to put the argument in rdi. There are no pop rdi instructions in questionableGadgets however using ropper or any ropping tool you should be able to find one. (0x4008c3) You can find where you should put your arguments to functions in a table at the bottom of this [wikipedia article](https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-AMD-24), it is based off architecture and compiler. Since you were given the binary and not the source, everyone should be the same and use rdi for this challenge.
 
 Pop the data segment (0x6010d0) into rdi and put system_plt entry on the stack and you will call system with 'bin/sh\x00' giving you a shell to cat the flag. You could repeat the process above and instead of calling system with 'bin/sh\x00' call it with 'cat flag.txt\x00'.
 
