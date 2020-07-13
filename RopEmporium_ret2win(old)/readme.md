@@ -1,7 +1,8 @@
 # Ret2csu
 
-This challenge has been recently updated this is how it used to be. The zip that you would grab from ropemporium is in this repo. Between the ---'s are the instructions given by ropemporium.
+This challenge has been recently updated this is how it used to be. The zip that you would grab from ropemporium is in this repo. Below is the problems instructions followed by my writeup.
 
+Problem Instructions from Ropemporium
 ----------------------------
 ### Same same, but different
 The challenge is simple: call the ret2win() function, the caveat this time is that the third argument (which you know by now is stored in the rdx register on x86_64 Linux) must be 0xdeadcafebabebeef. Populating this elusive register using ROP can prove more difficult than you might first think, especially in smaller binaries with fewer gadgets. This can become particularly irksome since many useful GLIBC functions require three arguments.
@@ -16,6 +17,7 @@ Fortunately some very smart people have come up with a solution to your problem 
 
 ----------------------------
 
+# My Writeup
 You can also look at the [BlackHat Asia Paper](https://i.blackhat.com/briefings/asia/2018/asia-18-Marco-return-to-csu-a-new-method-to-bypass-the-64-bit-Linux-ASLR-wp.pdf) instead of the slides from the Universal section above.
 
 
