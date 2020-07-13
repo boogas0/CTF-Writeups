@@ -17,13 +17,13 @@ Fortunately some very smart people have come up with a solution to your problem 
 
 ----------------------------
 
-# My Writeup
+## My Writeup
 You can also look at the [BlackHat Asia Paper](https://i.blackhat.com/briefings/asia/2018/asia-18-Marco-return-to-csu-a-new-method-to-bypass-the-64-bit-Linux-ASLR-wp.pdf) instead of the slides from the Universal section above.
 
 
 Run through the typical security checks and find the length of the buffer overflow. None of this has changed for any of the challenges yet so I don't feel the need to go through that.
 
-Going through the problem text from above all we need to do is populate the rdx register with a certain value and then call ret2win, which seems pretty simple. Sadly there is not a single viable gadget that can populate rdx with the value we want using typical rop gadget finders. In my case I used Ropper. This is where the BlackHat Asia Slides or Paper come in. Section 4 of the paper is where we will take most of the information from to help us with this challenge so read at least up to that point.
+Going through the problem text from above, it seems pretty simple, all we need to do is populate the rdx register with a certain value and then call ret2win. Sadly there is not a single viable gadget that can populate rdx with the value we want. This is where the BlackHat Asia Slides or Paper come in. Make sure you read at least up to section 5 on the paper as we will be using stuff mainly from section 4 for this challenge.
 
 Using the two Gadgets outlined in section 4 of the return to csu paper we can see a way to populate the rdx register. (below is Intel syntax and the paper used AT&T syntax)
 
@@ -46,7 +46,7 @@ Using the two Gadgets outlined in section 4 of the return to csu paper we can se
   400889:   41 ff 14 dc             call   QWORD PTR [r12+rbx*8]
 ```
 
-We can use gadget 1 to poulate the r15 register and then use gadget 2 to put the value of r15 into rdx. However at the end of Gadget 2 there is a call instead of a return. Also the call is dereferencing the operand. What this means is that it will call whatever value r12+(rbx\*8) points to. We want to call ret2win. If there was a memory address that points to ret2win somewhere in memory we could set r12+(rbx\*8) to that value and we would have what we want.
+We can use Gadget 1 to poulate the r15 register and then use Gadget 2 to put the value of r15 into rdx. However at the end of Gadget 2 there is a call instead of a return. Also the call is dereferencing the operand. What this means is that it will call whatever value r12+(rbx\*8) points to. We want to call ret2win. If there was a memory address that points to ret2win somewhere in memory we could set r12+(rbx\*8) to that value and we would have what we want.
 
 Open up the ret2win binary in Ghidra and go to the search tab and search for the hex value of ret2win (0x4007b1). Sadly there is nowhere in memory that works. Instead of calling ret2win we could call a different function.
 
@@ -63,9 +63,9 @@ Given that the GOT has the address of functions in its table and that table is i
   400572:   48 83 c4 08             add    rsp,0x8
   400576:   c3                      ret
 ```
-The \_init function puts a value in memory based off the rip and tests if that value is 0, if that value isnt 0 then it will return. So as long as \[rip+0x200a8d\] comes out to any value other than 0 then this function will basically do nothing, which is exactly what we want. If you make a script and run the program using gdb up to this point and look at the address in memory, you will see it is a non-zero value so this will work perfectly.
+The \_init function puts a value in memory based off the rip and tests if that value is 0, if that value isnt 0 then it will return without doing anything else. So as long as \[rip+0x200a8d\] comes out to any value other than 0 then this function will basically do nothing, which is exactly what we want. If you make a script and run the program using gdb up to this point and look at the address in memory, you will see it is a non-zero value so this will work perfectly.
 
-Okay now that we have the function we are going to call we have to see what happens after the call.
+We have the function we are going to call, now we must see what happens after the call. (Since we weren't able to call ret2win)
 
 #### Gadget 2 (extended)
 ```Assembly
@@ -94,11 +94,11 @@ We can see a few extra instructions between the end of Gadget 2 and the start of
   400894:   75 ea                   jne    400880 <__libc_csu_init+0x40>
   400896:   48 83 c4 08             add    rsp,0x8
 ```
-The few extra instructions are instructions used for loops. It will increment rbx, compare that value to rbp and if they are not equal then it jumps back to the start of Gadget 2. We don't want to jump back to the start of Gadget 2, we want to get to a return so that we can call ret2win now that rdx has 0xdeadcafebabebeef. So we need to make sure that before we get to this point that rbp = rbx + 1 and then getting the return will be smooth sailing.
+The few extra instructions are instructions used for loops. It will increment rbx, compare that value to rbp and if they are not equal then it jumps back to the start of Gadget 2. We don't want to jump back to the start of Gadget 2, we want to get to a return so that we can call ret2win. So we need to make sure that before we get to this point that rbp = rbx + 1 and then getting the return will be smooth sailing.
 
-Okay now lets recap on what we need to do:
+In summary what we need to do:
 1. populate rdx with 0xdeadcafebabebeef using Gadget 1 then Gadget 2
 2. Call \_init by having r12+(rbx\*8) = 0x600e38 which is an address that points to \_init
 3. Ensure rbp = rbx + 1 before using Gadget 2.
 
-
+Many different values for r12, rbx, and rbp can be used as long as they satisfy the equations above. You can look at my solution script for exactly how I accomplished that, but it is up to you how you want to do that.
